@@ -18,10 +18,6 @@ public class LogController : MonoBehaviour {
 
 	public static bool enableLogging = true;
 
-	void Start() {
-		EventController.Subscribe<RaycastHitInfo> (new Subscription<RaycastHitInfo>("OnClick", OnClickDown));
-	}
-
 	public static void Log(object message, UnityEngine.Object context = null) {
 		if (!enableLogging)
 			return;
@@ -30,9 +26,5 @@ public class LogController : MonoBehaviour {
 			Debug.Log (message, context);
 		else
 			Debug.Log (message);
-	}
-
-	void OnClickDown(object sender, EventMessage<RaycastHitInfo> e){
-		Log ("Clicked: " + e.Payload.Name);
 	}
 }

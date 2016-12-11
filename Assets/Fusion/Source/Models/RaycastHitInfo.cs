@@ -12,6 +12,7 @@ public class RaycastHitInfo {
 	public Transform Transform { get; private set; }
 	public GameObject GameObject { get; private set; }
 	public string Name { get; private set; }
+	public string Tag { get; private set; }
 
 	public RaycastHitInfo(RaycastHit raycastHit) 
 	{
@@ -23,5 +24,6 @@ public class RaycastHitInfo {
 		Transform = raycastHit.transform;
 		GameObject = raycastHit.transform.gameObject;
 		Name = raycastHit.transform.name;
+		Tag = raycastHit.transform.tag;
 	}
 }

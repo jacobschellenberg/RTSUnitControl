@@ -17,6 +17,10 @@ public class InputController : MonoBehaviour {
 	}
 
 	[SerializeField] Camera mainCamera;
+	[SerializeField] float timeUntilMouseDrag = 0.004f; // if mouse down helder longer than timer, it's a drag.
+
+	float mouseDownTimer;
+	bool isMouseDown;
 
 	void Start() {
 		if (mainCamera == null && Camera.main != null)
@@ -25,10 +29,26 @@ public class InputController : MonoBehaviour {
 
 	void Update() {
 		if (Input.GetMouseButtonDown (0))
-			ClickDown (Input.mousePosition);
+			isMouseDown = true;
+
+		if (Input.GetMouseButtonUp (0)) {
+			if (mouseDownTimer < timeUntilMouseDrag)
+				MouseDown (Input.mousePosition);
+
+			MouseUp(Input.mousePosition);
+
+			isMouseDown = false;
+			mouseDownTimer = 0;
+		}
+
+		if (isMouseDown)
+			mouseDownTimer += 0.01f * Time.deltaTime;
+
+		if (mouseDownTimer >= timeUntilMouseDrag)
+			MouseDrag ();
 	}
 
-	public RaycastHitInfo ClickDown(Vector3 mousePosition) {
+	public RaycastHitInfo MouseDown(Vector3 mousePosition) {
 		RaycastHitInfo raycastHitInfo = null;
 		var ray = mainCamera.ScreenPointToRay(mousePosition);
 		RaycastHit hitInfo;
@@ -37,7 +57,16 @@ public class InputController : MonoBehaviour {
 			raycastHitInfo = new RaycastHitInfo (hitInfo);
 		}
 
-		EventController.Publish("OnClick", raycastHitInfo);
+		EventController.Publish("MouseDown", raycastHitInfo);
+		LogController.Log ("Mouse Down");
 		return raycastHitInfo;
+	}
+
+	public void MouseUp(Vector3 mousePosition) {
+		LogController.Log ("Mouse Up");
+	}
+
+	public void MouseDrag() {
+		LogController.Log ("Mouse Drag");
 	}
 }
