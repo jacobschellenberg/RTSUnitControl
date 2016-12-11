@@ -5,8 +5,10 @@ using UnityEngine;
 public abstract class ActorViewController : MonoBehaviour {
 
 	protected virtual void Start() {
-		EventController.Subscribe (new Subscription<RaycastHitInfo> ("MouseDown", OnClickDown));
+		EventController.Subscribe (new Subscription<RaycastHitInfo> (InputEvent.LeftMouseButtonDown.ToString(), OnLeftMouseButtonDown));
+		EventController.Subscribe (new Subscription<RaycastHitInfo> (InputEvent.RightMouseButtonDown.ToString(), OnRightMouseButtonDown));
 	}
 
-	protected virtual void OnClickDown(object sender, EventMessage<RaycastHitInfo> e) {} 
+	protected virtual void OnLeftMouseButtonDown(object sender, EventMessage<RaycastHitInfo> e) {} 
+	protected virtual void OnRightMouseButtonDown(object sender, EventMessage<RaycastHitInfo> e) {} 
 }

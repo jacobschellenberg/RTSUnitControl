@@ -38,15 +38,15 @@ public class CellViewController : ActorViewController {
 		LogController.Log(this.name + " moving to: " + targetPosition);
 	}
 
-	protected override void OnClickDown(object sender, EventMessage<RaycastHitInfo> e) {
+	protected override void OnLeftMouseButtonDown(object sender, EventMessage<RaycastHitInfo> e) {
 		var actor = e.Payload.Transform.GetComponent<ActorViewController> ();
 
 		if (actor != null && actor.transform == this.transform)
 			selected = true;
 		else if (actor != null && actor.transform != this.transform)
 			selected = false;
-		else if(selected && e.Payload.Tag == "Ground")
-			MoveTo(new Vector3(e.Payload.Point.x, this.transform.position.y, e.Payload.Point.z));
+		else
+			selected = false;
 
 		if (selected) {
 			LogController.Log (this.name + " selected.");
@@ -54,5 +54,12 @@ public class CellViewController : ActorViewController {
 		}
 		else
 			meshRenderer.material.color = Color.white;
+	}
+
+	protected override void OnRightMouseButtonDown(object sender, EventMessage<RaycastHitInfo> e) {
+		var actor = e.Payload.Transform.GetComponent<ActorViewController> ();
+
+		if(selected && e.Payload.Tag == "Ground")
+			MoveTo(new Vector3(e.Payload.Point.x, this.transform.position.y, e.Payload.Point.z));
 	}
 }

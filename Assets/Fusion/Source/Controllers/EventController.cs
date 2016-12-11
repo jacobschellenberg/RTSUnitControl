@@ -29,7 +29,7 @@ public class EventController {
 
 	public static void Publish<T>(string eventName, T payload)
 	{
-		var publisher = GetPublisher<T>(eventName);
+		var publisher = GetOrCreatePublisher<T>(eventName);
 		publisher.PublishData (payload);
 	}
 
