@@ -5,19 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
-public class EventController : MonoBehaviour {
-
-	private static EventController instance;
-	public static EventController Instance
-	{
-		get
-		{
-			if (instance == null)
-				instance = GameObject.FindGameObjectWithTag ("EventController").GetComponent<EventController> () as EventController;
-
-			return instance;
-		}
-	}
+public class EventController {
 
 	private static Dictionary<string, object> publishers = new Dictionary<string, object>();
 

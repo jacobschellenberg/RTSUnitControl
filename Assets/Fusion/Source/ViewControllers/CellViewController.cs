@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ActorViewModel : MonoBehaviour {
+public class CellViewController : ActorViewController {
 
 	[SerializeField] float speed;
 
@@ -12,15 +12,15 @@ public class ActorViewModel : MonoBehaviour {
 	bool targetPositionSet = false;
 	Renderer meshRenderer;
 
-	void Start() {
+	protected override void Start() {
+		base.Start ();
 		meshRenderer = this.transform.GetComponent<Renderer> ();
-		EventController.Subscribe (new Subscription<RaycastHitInfo> ("MouseDown", OnClickDown));
 	}
 
 	void Update() {
 		if (!selected && !targetPositionSet)
 			return;
-		
+
 		if (Vector3.Distance (this.transform.position, targetPosition) < 0.1f) { 
 			atPosition = true;
 			targetPositionSet = false;
@@ -30,8 +30,16 @@ public class ActorViewModel : MonoBehaviour {
 			this.transform.position = Vector3.MoveTowards (this.transform.position, targetPosition, speed * Time.deltaTime);
 	}
 
-	public void OnClickDown(object sender, EventMessage<RaycastHitInfo> e) {
-		var actor = e.Payload.Transform.GetComponent<ActorViewModel> ();
+	public void MoveTo(Vector3 position)
+	{
+		targetPosition = position;
+		atPosition = false;
+		targetPositionSet = true;
+		LogController.Log(this.name + " moving to: " + targetPosition);
+	}
+
+	protected override void OnClickDown(object sender, EventMessage<RaycastHitInfo> e) {
+		var actor = e.Payload.Transform.GetComponent<ActorViewController> ();
 
 		if (actor != null && actor.transform == this.transform)
 			selected = true;
@@ -46,13 +54,5 @@ public class ActorViewModel : MonoBehaviour {
 		}
 		else
 			meshRenderer.material.color = Color.white;
-	}
-
-	public void MoveTo(Vector3 position)
-	{
-		targetPosition = position;
-		atPosition = false;
-		targetPositionSet = true;
-		LogController.Log(this.name + " moving to: " + targetPosition);
 	}
 }

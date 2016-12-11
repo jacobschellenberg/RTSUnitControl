@@ -2,19 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class InputController : MonoBehaviour {
-
-	private static InputController instance;
-	public static InputController Instance {
-		get { 
-			if (instance == null)
-				instance = GameObject.FindGameObjectWithTag ("InputController").GetComponent<InputController> () as InputController;
-
-			return instance;
-		}
-	}
 
 	[SerializeField] Camera mainCamera;
 	[SerializeField] float timeUntilMouseDrag = 0.002f; // if mouse down helder longer than timer, it's a drag.
@@ -63,7 +52,7 @@ public class InputController : MonoBehaviour {
 			MouseDrag (Input.mousePosition);
 	}
 
-	public RaycastHitInfo MouseDown(Vector3 mousePosition) {
+	private RaycastHitInfo MouseDown(Vector3 mousePosition) {
 		RaycastHitInfo raycastHitInfo = null;
 		var ray = mainCamera.ScreenPointToRay(mousePosition);
 		RaycastHit hitInfo;
@@ -77,7 +66,7 @@ public class InputController : MonoBehaviour {
 		return raycastHitInfo;
 	}
 
-	public void MouseUp(Vector3 mousePosition) {
+	private void MouseUp(Vector3 mousePosition) {
 		// Reset
 		initialClickPosition = Vector2.zero;
 		selectionBox.anchoredPosition = Vector2.zero;
@@ -86,7 +75,7 @@ public class InputController : MonoBehaviour {
 		LogController.Log ("Mouse Up: " + mousePosition);
 	}
 
-	public void MouseDrag(Vector3 position) {
+	private void MouseDrag(Vector3 position) {
 		// Store the current mouse position in screen space.
 		Vector2 currentMousePosition = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
 
