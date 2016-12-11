@@ -41,19 +41,14 @@ public class CellViewController : ActorViewController {
 	protected override void OnLeftMouseButtonDown(object sender, EventMessage<RaycastHitInfo> e) {
 		var actor = e.Payload.Transform.GetComponent<ActorViewController> ();
 
-		if (actor != null && actor.transform == this.transform)
+		if (actor != null && actor.transform == this.transform) {
 			selected = true;
-		else if (actor != null && actor.transform != this.transform)
-			selected = false;
-		else
-			selected = false;
-
-		if (selected) {
 			LogController.Log (this.name + " selected.");
 			meshRenderer.material.color = Color.green;
-		}
-		else
+		} else if (actor == null || actor != null && actor.transform != this.transform) {
+			selected = false;
 			meshRenderer.material.color = Color.white;
+		}
 	}
 
 	protected override void OnRightMouseButtonDown(object sender, EventMessage<RaycastHitInfo> e) {
