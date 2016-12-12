@@ -25,10 +25,12 @@ public class InputController : MonoBehaviour {
 	bool mouseUpFromDrag;
 
 	// Draggable inspector reference to the Image GameObject's RectTransform.
-	public RectTransform selectionBox;
+	[SerializeField] RectTransform selectionBox;
+	[SerializeField] Transform debugSelectionBox;
 
 	// This variable will store the location of wherever we first click before dragging.
 	private Vector2 initialClickPosition = Vector2.zero;
+
 
 	void Start() {
 		if (mainCamera == null && Camera.main != null)
@@ -91,17 +93,16 @@ public class InputController : MonoBehaviour {
 		return raycastHitInfo;
 	}
 
-	private List<RaycastHitInfo> GetRaycastHitInfos(Vector2 mousePosition)
+	private List<RaycastHitInfo> GetRaycastHitInfos(Vector3 center, Vector3 size)
 	{
 		var raycastHitInfos = new List<RaycastHitInfo> ();
 
-//		var hitInfos = Physics.BoxCastAll(
+		var hitInfos = Physics.BoxCastAll (center, size, mainCamera.transform.forward, Quaternion.identity, Mathf.Infinity);
 
-//
-//		foreach (var hitInfo in hitInfos) {
-//			var raycastHitInfo = new RaycastHitInfo (hitInfo);
-//			raycastHitInfos.Add (raycastHitInfo);
-//		}
+		foreach (var hitInfo in hitInfos) {
+			var raycastHitInfo = new RaycastHitInfo (hitInfo);
+			raycastHitInfos.Add (raycastHitInfo);
+		}
 
 		LogController.Log ("BoxCast hits: " + raycastHitInfos.Count);
 		return raycastHitInfos;
@@ -118,8 +119,6 @@ public class InputController : MonoBehaviour {
 		var raycastHitInfos = new List<RaycastHitInfo>();
 
 		if (mouseUpFromDrag) {
-//			raycastHitInfos = GetRaycastHitInfos (mousePosition);
-
 			var startPoint = GetRaycastHitInfo (initialClickPosition);
 			var lastPoint = GetRaycastHitInfo (mousePosition);
 			var midPoint = new Vector3 ((startPoint.Point.x + lastPoint.Point.x) / 2, 0, (startPoint.Point.z + lastPoint.Point.z) / 2);
@@ -134,16 +133,17 @@ public class InputController : MonoBehaviour {
 			LogController.Log ("x1: " + x1 + " x2: " + x2);
 			LogController.Log ("y1: " + y1 + " y2: " + y2);
 
-			var size = new Vector3(startPoint.Point.x - lastPoint.Point.x, 1, startPoint.Point.z - lastPoint.Point.z);
+			var size = new Vector3(Mathf.Abs(startPoint.Point.x - lastPoint.Point.x), 1, Mathf.Abs(startPoint.Point.z - lastPoint.Point.z));
 
 			LogController.Log ("Start point: " + startPoint.Point);
 			LogController.Log ("Last point: " + lastPoint.Point);
 			LogController.Log ("Mid point: " + midPoint);
 			LogController.Log ("Box size: " + size);
 
-			var point = GameObject.CreatePrimitive (PrimitiveType.Cube);
-			point.transform.localScale = size;
-			point.transform.position = midPoint;
+			debugSelectionBox.localScale = size;
+			debugSelectionBox.position = midPoint;
+
+			raycastHitInfos = GetRaycastHitInfos (midPoint, size / 2);
 		}
 		else
 			raycastHitInfos.Add(GetRaycastHitInfo (mousePosition));
