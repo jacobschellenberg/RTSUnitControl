@@ -51,9 +51,22 @@ public class CellViewController : ActorViewController {
 		}
 	}
 
-	protected override void OnRightMouseButtonDown(object sender, EventMessage<RaycastHitInfo> e) {
-		var actor = e.Payload.Transform.GetComponent<ActorViewController> ();
+	protected override void OnLeftMouseButtonUp(object sender, EventMessage<List<RaycastHitInfo>> e) {
+		selected = false;
+		meshRenderer.material.color = Color.white;
 
+		foreach (var payload in e.Payload) {
+			var actor = payload.Transform.GetComponent<ActorViewController> ();
+
+			if (actor != null && actor.transform == this.transform) {
+				selected = true;
+				LogController.Log (this.name + " selected.");
+				meshRenderer.material.color = Color.green;
+			}
+		}
+	}
+
+	protected override void OnRightMouseButtonDown(object sender, EventMessage<RaycastHitInfo> e) {
 		if(selected && e.Payload.Tag == "Ground")
 			MoveTo(new Vector3(e.Payload.Point.x, this.transform.position.y, e.Payload.Point.z));
 	}
