@@ -15,21 +15,14 @@ public enum InputEvent
 
 public class InputController : MonoBehaviour
 {
+	[SerializeField] private Camera mainCamera;
+	[SerializeField] private float timeUntilMouseDrag = 0.002f; // if mouse down helder longer than timer, it's a drag.
+	[SerializeField] private RectTransform selectionBox; // Draggable inspector reference to the Image GameObject's RectTransform.
+	[SerializeField] private Transform debugSelectionBox;
 
-	[SerializeField] Camera mainCamera;
-	[SerializeField] float timeUntilMouseDrag = 0.002f;
-	// if mouse down helder longer than timer, it's a drag.
-
-	// Draggable inspector reference to the Image GameObject's RectTransform.
-	[SerializeField] RectTransform selectionBox;
-	[SerializeField] Transform debugSelectionBox;
-
-	// This variable will store the location of wherever we first click before dragging.
-	private Vector2 initialClickPosition = Vector2.zero;
-
+	private Vector2 initialClickPosition = Vector2.zero; // This variable will store the location of wherever we first click before dragging.
 	private int leftMouseButton = 0;
 	private int rightMouseButton = 1;
-
 	private float mouseDownTimer;
 	private bool isMouseDown;
 	private bool mouseUpFromDrag;

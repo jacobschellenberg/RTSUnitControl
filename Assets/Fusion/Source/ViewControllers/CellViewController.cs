@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class CellViewController : ActorViewController {
 
-	[SerializeField] float speed;
+	[SerializeField] private float speed;
 
-	Vector3 targetPosition;
-	bool atPosition = false;
-	bool selected = false;
-	bool targetPositionSet = false;
-	Renderer meshRenderer;
+	private Vector3 targetPosition;
+	private bool atPosition = false;
+	private bool selected = false;
+	private bool targetPositionSet = false;
+	private Renderer meshRenderer;
 
 	protected override void Start() {
 		base.Start ();
 		meshRenderer = this.transform.GetComponent<Renderer> ();
 	}
 
-	void Update() {
+	private void Update() {
 		if (!selected && !targetPositionSet)
 			return;
 
