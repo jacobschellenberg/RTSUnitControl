@@ -36,18 +36,22 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	private void OnRightMouseButtonDown(object sender, EventMessage<RaycastHitInfo> e) {
-		if (e.Payload.Tag != "Ground")
-			return;
-		
+		var actor = GetActorFromPayload (e.Payload);
 		var selectedActors = GetSelectedActors ();
 
-		selectedActors.ForEach (_ => {
-			_.MoveTo(new Vector3(e.Payload.Point.x, this.transform.position.y, e.Payload.Point.z));
-		});
+		if (actor != null) {
+			selectedActors.ForEach (_ => {
+				_.GoToTarget (actor.transform);
+			});
+		} else {
+			selectedActors.ForEach (_ => {
+				_.MoveTo (new Vector3 (e.Payload.Point.x, this.transform.position.y, e.Payload.Point.z));
+			});
+		}
 	}
 
 	private void OnShiftLeftMouseButtonUp(object sender, EventMessage<List<RaycastHitInfo>> e) {
-		var actors = GetActorsFromPayload (e.Payload);
+		var actors = GetActorsFromPayload (e.Payload).Where(_ => _.Player.TeamSettings.ID == TeamSettings.ID).ToList();
 		var selectedActors = GetSelectedActors ();
 
 		if (selectedActors.ContainsAll (actors)) {
