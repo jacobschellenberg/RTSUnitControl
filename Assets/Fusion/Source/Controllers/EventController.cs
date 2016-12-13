@@ -38,9 +38,7 @@ public class EventController {
 		var publisher = GetPublisher<T>(eventName);
 
 		if(publisher == null) 
-		{
 			publisher = CreatePublisher<T> (eventName);
-		}
 
 		return publisher;
 	}

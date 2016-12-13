@@ -10,7 +10,9 @@ public enum InputEvent
 	LeftMouseButtonUp,
 	LeftMouseButtonDrag,
 	RightMouseButtonDown,
-	RightMouseButtonUp
+	RightMouseButtonUp,
+	ShiftLeftMouseButtonDown,
+	ShiftLeftMouseButtonUp
 }
 
 public class InputController : MonoBehaviour
@@ -19,6 +21,7 @@ public class InputController : MonoBehaviour
 	[SerializeField] private float timeUntilMouseDrag = 0.002f; // if mouse down helder longer than timer, it's a drag.
 	[SerializeField] private RectTransform selectionBox; // Draggable inspector reference to the Image GameObject's RectTransform.
 	[SerializeField] private Transform debugSelectionBox;
+	[SerializeField] private bool visualizeSelection = true;
 
 	private Vector2 initialClickPosition = Vector2.zero; // This variable will store the location of wherever we first click before dragging.
 	private int leftMouseButton = 0;
@@ -94,7 +97,6 @@ public class InputController : MonoBehaviour
 	private List<RaycastHitInfo> GetRaycastHitInfos (Vector3 center, Vector3 size)
 	{
 		var raycastHitInfos = new List<RaycastHitInfo> ();
-
 		var hitInfos = Physics.BoxCastAll (center, size, mainCamera.transform.forward, Quaternion.identity, Mathf.Infinity);
 
 		foreach (var hitInfo in hitInfos) {
@@ -110,8 +112,13 @@ public class InputController : MonoBehaviour
 	{
 		var raycastHitInfo = GetRaycastHitInfo (mousePosition);
 
-		EventController.Publish (InputEvent.LeftMouseButtonDown.ToString (), raycastHitInfo);
-		LogController.Log ("Left mouse button down: " + mousePosition);
+		if (Input.GetKey (KeyCode.LeftShift)) {
+			EventController.Publish (InputEvent.ShiftLeftMouseButtonDown.ToString (), raycastHitInfo);
+			LogController.Log ("Shift left mouse button down: " + mousePosition);
+		} else {
+			EventController.Publish (InputEvent.LeftMouseButtonDown.ToString (), raycastHitInfo);
+			LogController.Log ("Left mouse button down: " + mousePosition);
+		}
 	}
 
 	private void LeftMouseButtonUp (Vector2 mousePosition)
@@ -140,8 +147,11 @@ public class InputController : MonoBehaviour
 			LogController.Log ("Mid point: " + midPoint);
 			LogController.Log ("Box size: " + size);
 
-			debugSelectionBox.localScale = size;
-			debugSelectionBox.position = midPoint;
+			if (visualizeSelection) {
+				debugSelectionBox.localScale = size;
+				debugSelectionBox.position = midPoint;
+			} else
+				debugSelectionBox.localScale = Vector3.zero;
 
 			raycastHitInfos = GetRaycastHitInfos (midPoint, size / 2);
 		} 
@@ -155,8 +165,14 @@ public class InputController : MonoBehaviour
 		selectionBox.anchoredPosition = Vector2.zero;
 		selectionBox.sizeDelta = Vector2.zero;
 
-		EventController.Publish (InputEvent.LeftMouseButtonUp.ToString (), raycastHitInfos);
-		LogController.Log ("Left mouse button up: " + mousePosition);
+		if (Input.GetKey (KeyCode.LeftShift)) {
+			EventController.Publish (InputEvent.ShiftLeftMouseButtonUp.ToString (), raycastHitInfos); // normal click, should only be one object.
+			LogController.Log ("Shift left mouse button up: " + mousePosition);
+		}
+		else {
+			EventController.Publish (InputEvent.LeftMouseButtonUp.ToString (), raycastHitInfos);
+			LogController.Log ("Left mouse button up: " + mousePosition);
+		}
 	}
 
 	private void LeftMouseButtonDrag (Vector3 mousePosition)
@@ -189,7 +205,6 @@ public class InputController : MonoBehaviour
 		selectionBox.anchoredPosition = startPoint;
 		selectionBox.sizeDelta = difference;
 
-//		EventController.Publish("LeftMouseButtonDrag", raycastHitInfo);
 		LogController.Log ("Left mouse button drag: " + mousePosition);
 	}
 
