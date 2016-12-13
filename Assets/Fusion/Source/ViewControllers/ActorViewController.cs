@@ -4,16 +4,18 @@ using UnityEngine;
 
 public abstract class ActorViewController : MonoBehaviour {
 
+	public PlayerController Player { get; private set; }
 	public bool IsSelected { get; private set; }
 
 	[SerializeField] private float speed;
+	[SerializeField] private Transform selectedCircle;
 
 	private Vector3 targetPosition;
 	private bool atPosition = false;
 	private bool targetPositionSet = false;
 	private Renderer meshRenderer;
 
-	protected virtual void Start() {
+	protected virtual void Awake() {
 		meshRenderer = this.transform.GetComponent<Renderer> ();
 	}
 
@@ -40,13 +42,21 @@ public abstract class ActorViewController : MonoBehaviour {
 
 	public void Select() {
 		IsSelected = true;
-		meshRenderer.material.color = Color.green;
+//		meshRenderer.material.color = Color.green;
+		selectedCircle.gameObject.SetActive(true);
 		LogController.Log (this.name + " selected.");
 	}
 
 	public void Deselect() {
 		IsSelected = false;
-		meshRenderer.material.color = Color.white;
+//		meshRenderer.material.color = Player.TeamSettings.Color;
+		selectedCircle.gameObject.SetActive(false);
 		LogController.Log (this.name + " deselected.");
+	}
+
+	public void SetPlayer(PlayerController player) {
+		Player = player;
+
+		meshRenderer.material.color = Player.TeamSettings.Color;
 	}
 }
