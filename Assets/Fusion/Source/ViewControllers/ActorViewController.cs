@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public abstract class ActorViewController : MonoBehaviour {
 
@@ -12,6 +13,7 @@ public abstract class ActorViewController : MonoBehaviour {
 	[SerializeField] private float defaultStopAtDistance = 0.1f;
 	[SerializeField] private float visionDistance = 3;
 	[SerializeField] private float followDistance = 1.5f;
+	[SerializeField] private float tooCloseDistance = 1;
 
 	private Transform target;
 	private Vector3 targetPosition;
@@ -23,12 +25,18 @@ public abstract class ActorViewController : MonoBehaviour {
 	private Vector3 rayOrigin;
 	private Ray ray;
 	private RaycastHit raycastHitInfo;
+	private bool tooClose;
+	ActorViewController closestActor = null;
+	private float closest = 0;
 
 	protected virtual void Awake() {
 		meshRenderer = this.transform.GetComponent<Renderer> ();
 	}
 
 	protected virtual void Update() { 
+		if(closestActor != null && IsSelected)
+			LogController.Log ("Closes Actor: " + closestActor.name);
+
 		if (!IsSelected && !targetPositionSet && target == null)
 			return;
 
@@ -36,17 +44,42 @@ public abstract class ActorViewController : MonoBehaviour {
 		ray = new Ray (rayOrigin, this.transform.forward);
 		Debug.DrawRay (rayOrigin, (this.transform.forward * visionDistance));
 
-		if (Physics.Raycast (ray, out raycastHitInfo, visionDistance)) {
-			var actor = raycastHitInfo.collider.transform.GetComponent<ActorViewController> ();
+		var overlapActors = Physics.OverlapSphere (this.transform.position, visionDistance)
+			.Where(_ => _.GetComponent<ActorViewController>() != null)
+			.Select (_ => _.GetComponent<ActorViewController> ())
+			.Where(_ => _ != this);
 
-			if (actor != null) {
-				stopAtDistance = 1.5f;
-				LogController.Log ("Sighted: " + actor.name);
-			} else
+		if (overlapActors.Any ()) {
+			var nearActors = overlapActors.Where (_ => Vector3.Distance (this.transform.position, _.transform.position) < tooCloseDistance).ToList ();
+
+			if (nearActors.Any ()) {
+				foreach (var actor in nearActors) {
+					var distance = Vector3.Distance (this.transform.position, actor.transform.position);
+
+					if (closestActor == null) {
+						closestActor = actor;
+						closest = distance;
+					}
+
+					if (distance < closest) {
+						closestActor = actor;
+						closest = distance;
+					}
+				}
+
+				tooClose = true;
+			} else {
 				stopAtDistance = defaultStopAtDistance;
-		} 
-		else
+				closestActor = null;
+				closest = 0;
+				tooClose = false;
+			}
+		} else {
 			stopAtDistance = defaultStopAtDistance;
+			closestActor = null;
+			closest = 0;
+			tooClose = false;
+		}
 
 		if (target != null && Vector3.Distance (this.transform.position, target.position) > stopAtDistance) {
 			targetPosition = target.transform.position;
@@ -61,7 +94,14 @@ public abstract class ActorViewController : MonoBehaviour {
 
 		if (targetPositionSet && !atPosition) {
 			this.transform.LookAt (targetPosition);
-			this.transform.position = Vector3.MoveTowards (this.transform.position, targetPosition, speed * Time.deltaTime);
+
+			// TODO: cheated using rigidbody... fix that.
+//			if (tooClose) {
+//				Vector3 dir = transform.position - closestActor.transform.position;
+//				this.transform.Translate(dir * (speed * 1.5f) * Time.deltaTime);
+//			}
+//			else
+				this.transform.position = Vector3.MoveTowards (this.transform.position, targetPosition, speed * Time.deltaTime);
 		}
 	}
 
